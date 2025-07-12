@@ -1,13 +1,14 @@
-def get_waze_alertes():
-    return [
-        {
-            "type": "police",
-            "lat": 48.8566,
-            "lon": 2.3522,
-            "description": "Contrôle",
-            "distance": 5.2,
-            "time_since": "3 min",
-            "validations": 12,
-            "new": True
-        }
-    ]
+from flask import Flask, jsonify
+from flask_cors import CORS
+from waze_scraper import get_waze_alertes
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/alertes', methods=['GET'])
+def alertes():
+    alertes_data = get_waze_alertes()
+    return jsonify(alertes=alertes_data)
+
+if __name__ == '__main__':
+    app.run(debug=True)
