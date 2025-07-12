@@ -1,16 +1,24 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from waze_scraper import obtenir_waze_alertes
 
+app = Flask(__name__)
+CORS(app)  # Autorise les appels depuis le navigateur
 
-from flask import Flask, request, jsonify from flask_cors import CORS from waze_scraper import obtenir_waze_alertes
+@app.route('/')
+def index():
+    return jsonify({"message": "API Waze opérationnelle"})
 
-app = Flask(name) CORS(app)
+@app.route('/alertes', methods=['GET'])
+def alertes():
+    try:
+        lat = float(request.args.get("lat"))
+        lon = float(request.args.get("lon"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Paramètres lat et lon requis"}), 400
 
-@app.route('/alertes', methods=['GET']) def alertes(): lat = request.args.get('lat', type=float) lon = request.args.get('lon', type=float)
+    alertes = obtenir_waze_alertes(lat, lon)
+    return jsonify(alertes)
 
-if lat is None or lon is None:
-    return jsonify({"error": "Latitude ou longitude manquante"}), 400
-
-donnees_alertes = obtenir_waze_alertes(lat, lon)
-return jsonify(alertes=donnees_alertes)
-
-if name == 'main': app.run(debug=True)
-
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
