@@ -1,37 +1,22 @@
+import os import time import json import requests from flask import Flask, jsonify
 
-from flask import Flask, jsonify
-import requests
-import csv
-from io import StringIO
+app = Flask(name)
 
-app = Flask(__name__)
+URL officielle de la liste des radars (data.gouv.fr ou autre fiable)
 
-RADAR_DATA_URL = "https://static.data.gouv.fr/resources/radars-routiers/20230425-115722/radars.csv"
+RADAR_DATA_URL = "https://data.gouv.fr/fr/datasets/r/1cb544a7-fc3a-48f7-b9e4-0763616c9ff3"  # Remplacer par le bon lien réel
 
-def get_radar_data():
-    try:
-        response = requests.get(RADAR_DATA_URL)
-        response.raise_for_status()
-        csv_data = response.text
-        f = StringIO(csv_data)
-        reader = csv.DictReader(f, delimiter=';')
-        radars = []
-        for row in reader:
-            if row.get("latitude") and row.get("longitude"):
-                radars.append({
-                    "latitude": float(row["latitude"]),
-                    "longitude": float(row["longitude"]),
-                    "categorie": row.get("type", "Inconnu"),
-                    "info": row.get("emplacement", "")
-                })
-        return radars
-    except Exception as e:
-        return {"error": str(e)}
+Fichier local temporaire + temps de cache
 
-@app.route("/radars", methods=["GET"])
-def radars():
-    data = get_radar_data()
-    return jsonify(data)
+RADAR_CACHE_FILE = "radars_cache.json" CACHE_DURATION_SECONDS = 86400  # 24h
 
-if __name__ == "__main__":
-    app.run(debug=True)
+def is_cache_valid(): if not os.path.exists(RADAR_CACHE_FILE): return False last_modified = os.path.getmtime(RADAR_CACHE_FILE) return (time.time() - last_modified) < CACHE_DURATION_SECONDS
+
+def update_cache(): try: response = requests.get(RADAR_DATA_URL, timeout=10) if response.status_code == 200: with open(RADAR_CACHE_FILE, 'w', encoding='utf-8') as f: f.write(response.text) print("Cache updated successfully.") else: print(f"Failed to download radar data: {response.status_code}") except Exception as e: print(f"Exception while updating cache: {e}")
+
+def load_cached_radars(): with open(RADAR_CACHE_FILE, 'r', encoding='utf-8') as f: return json.load(f)
+
+@app.route("/radars") def get_radars(): if not is_cache_valid(): update_cache() try: radars = load_cached_radars() return jsonify(radars) except Exception as e: return jsonify({"error": f"Failed to load radar data: {str(e)}"}), 500
+
+if name == "main": app.run(host="0.0.0.0", port=5000)
+
