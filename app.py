@@ -1,24 +1,37 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from waze_scraper import obtenir_waze_alertes
+
+from flask import Flask, jsonify
+import requests
+import csv
+from io import StringIO
 
 app = Flask(__name__)
-CORS(app)  # Autorise les appels depuis le navigateur
 
-@app.route('/')
-def index():
-    return jsonify({"message": "API Waze opérationnelle"})
+RADAR_DATA_URL = "https://static.data.gouv.fr/resources/radars-routiers/20230425-115722/radars.csv"
 
-@app.route('/alertes', methods=['GET'])
-def alertes():
+def get_radar_data():
     try:
-        lat = float(request.args.get("lat"))
-        lon = float(request.args.get("lon"))
-    except (TypeError, ValueError):
-        return jsonify({"error": "Paramètres lat et lon requis"}), 400
+        response = requests.get(RADAR_DATA_URL)
+        response.raise_for_status()
+        csv_data = response.text
+        f = StringIO(csv_data)
+        reader = csv.DictReader(f, delimiter=';')
+        radars = []
+        for row in reader:
+            if row.get("latitude") and row.get("longitude"):
+                radars.append({
+                    "latitude": float(row["latitude"]),
+                    "longitude": float(row["longitude"]),
+                    "categorie": row.get("type", "Inconnu"),
+                    "info": row.get("emplacement", "")
+                })
+        return radars
+    except Exception as e:
+        return {"error": str(e)}
 
-    alertes = obtenir_waze_alertes(lat, lon)
-    return jsonify(alertes)
+@app.route("/radars", methods=["GET"])
+def radars():
+    data = get_radar_data()
+    return jsonify(data)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run(debug=True)
