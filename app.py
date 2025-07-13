@@ -1,3 +1,4 @@
+
 import os
 import time
 import json
@@ -8,7 +9,7 @@ app = Flask(__name__)
 
 @app.route('/radars')
 def get_radars():
-    # Exemple de données à remplacer par le vrai JSON après téléchargement
+    # Exemple de données à remplacer par une récupération dynamique si besoin
     data = {
         "radars": [
             {"type": "Radar Fixe", "latitude": 43.6, "longitude": 1.44},
