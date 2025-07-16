@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: flask-waze-alertes
+    env: docker
+    plan: free
+    autoDeploy: true
