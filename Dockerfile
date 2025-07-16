@@ -38,4 +38,4 @@ RUN python -m playwright install --with-deps
 COPY . .
 
 # Lancer gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
