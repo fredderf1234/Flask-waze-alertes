@@ -18,7 +18,7 @@ def get_alertes():
             browser = p.chromium.launch(headless=True)
             context = browser.new_context()
             page = context.new_page()
-            url = f"https://www.waze.com/live-map?ll={lat}%2C{lon}&z=13"
+            url = f"https://www.waze.com/live-map?ll={lat}%2C{lon}&z=15"
             page.goto(url, timeout=60000)
             page.wait_for_timeout(10000)
 
