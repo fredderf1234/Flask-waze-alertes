@@ -1,7 +1,7 @@
 
 import os
 import time
-import uvicor
+import uvicorn
 import requests
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
