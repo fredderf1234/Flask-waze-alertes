@@ -2,4 +2,4 @@ flask
 playwright
 gunicorn
 flask-cors
-resuests
+requests
