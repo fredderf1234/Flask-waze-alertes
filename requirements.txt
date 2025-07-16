@@ -3,3 +3,9 @@ playwright
 gunicorn
 flask-cors
 requests
+fastapi
+uvicorn
+numpy
+opencv-python-headless
+pillow
+
