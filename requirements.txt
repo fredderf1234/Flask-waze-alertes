@@ -1,6 +1,0 @@
-Flask
-playwright
-gunicorn
-flask-cors
-requests
-flask
